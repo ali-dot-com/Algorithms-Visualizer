@@ -1,10 +1,11 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from PyQt5 import QtCore, QtGui, QtWidgets
-from matplotlib.widgets import *
-from PyQt5.QtWidgets import QMessageBox
+# from matplotlib.widgets import *
+# from PyQt5.QtWidgets import QMessageBox
 import sys
-from bfs import Graph_bfs
+from bfs import BFS
+from dfs import DFS
 
 DG = nx.DiGraph()
 G = nx.Graph()
@@ -25,52 +26,70 @@ class Ui_AISearchingTechniquesMainWindow(object):
             sys.stdout = f  # Change the standard output to the file we created.
             searchType = str(self.SearchTypecomboBox.currentText())
             graphType = str(self.GraphTypecomboBox.currentText())
+            start = self.startingNode.text()
+            goal = Goal_list
 
             if (graphType == "Undirectd Graph"):
                 if searchType == "BFS":
-                    graphbfs = Graph_bfs(G, graphType)
-                    start = self.StartNode_input.text()
-                    goal = Goal_list
+                    graphbfs = BFS(G, graphType)
                     bfsPath = graphbfs.bfs(start, goal)
                     if (bfsPath):
                         print('BFS Path: ', end=' ')
-                        graphbfs.print_path(bfsPath)
-                        print()
+                        graphbfs.bfsTraversal(bfsPath)
                         Goal_list.clear()
                     else :
                         print('Path Does not Exist')
+                elif searchType == "DFS":
+                    graphdfs = DFS(G, graphType)
+                    dfsPath = graphdfs.dfs(start, goal)
+                    if dfsPath:
+                        print("DFS: Path: ", end = ' ')
+                        graphdfs.dfsTraversal(dfsPath)
+                        Goal_list.clear()
+                    else:
+                        print("Path Does not exist")
+
             else:       #for directed graph
                 if searchType == "BFS":
-                    graphbfs = Graph_bfs(DG,graphType)
-
-                    start = self.StartNode_input.text()
+                    graphbfs = BFS(G, graphType)
+                    start = self.startingNode.text()
                     goals = Goal_list
                     bfsPath = graphbfs.bfs(start, goals)
                     if (bfsPath):
                         print('Path:', end=' ')
-                        graphbfs.print_path(bfsPath)
+                        graphbfs.bfsTraversal(bfsPath)
                         print()
                         Goal_list.clear()
                     else:
                         print('Path Does not Exist')
+                elif searchType == "DFS":
+                    graphdfs = DFS(G, graphType)
+                    # start = self.startingNode.text()
+                    # goal = Goal_list
+                    dfsPath = graphdfs.dfs(start, goal)
+                    if dfsPath:
+                        print("DFS: Path: ", end = ' ')
+                        graphdfs.dfsTraversal(dfsPath)
+                        Goal_list.clear()
+                    else:
+                        print("Path Does not exist")
 
         sys.stdout = original_stdout  # Reset the standard output to its original value
 
         with open("test.txt") as f:
             contents = f.read()
-
         self.TheResult_Label.setText(contents)
 
     def GenerateGraphClicked(self):
         if self.GraphTypecomboBox.currentText() == "Undirectd Graph":
             pos = nx.spring_layout(G)
             nx.draw(G, pos, with_labels=True, node_size=1000)
-            nx.draw_networkx_edge_labels(G, pos, font_size=18, edge_labels=nx.get_edge_attributes(G, 'weight'))
+            nx.draw_networkx_edge_labels(G, pos, font_size=16, edge_labels=nx.get_edge_attributes(G, 'weight'))
             plt.show()
         elif self.GraphTypecomboBox.currentText() == "Directed Graph":
             pos = nx.spring_layout(DG)
-            nx.draw(DG, pos, with_labels=True, node_size=1500)
-            nx.draw_networkx_edge_labels(DG, pos, font_size=26, edge_labels=nx.get_edge_attributes(DG, 'weight'))
+            nx.draw(DG, pos, with_labels=True, node_size=1000)
+            nx.draw_networkx_edge_labels(DG, pos, font_size=16, edge_labels=nx.get_edge_attributes(DG, 'weight'))
             plt.show()
 
     def AddNodeClicked(self):
@@ -103,13 +122,10 @@ class Ui_AISearchingTechniquesMainWindow(object):
         Goal_list.append(G)
         self.GoalNode_input.clear()
 
-
-
-
-    def setupUi(self, AISearchingTechniquesMainWindow):
-        AISearchingTechniquesMainWindow.setObjectName("AISearchingTechniquesMainWindow")
-        AISearchingTechniquesMainWindow.resize(800, 700)
-        self.centralwidget = QtWidgets.QWidget(AISearchingTechniquesMainWindow)
+    def setupUi(self, mainWindow):
+        mainWindow.setObjectName("AI Project")
+        mainWindow.resize(770, 600)
+        self.centralwidget = QtWidgets.QWidget(mainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.SearchTypecomboBox = QtWidgets.QComboBox(self.centralwidget)
         self.SearchTypecomboBox.setGeometry(QtCore.QRect(630, 50, 121, 22))
@@ -173,7 +189,8 @@ class Ui_AISearchingTechniquesMainWindow(object):
         self.AddNodesButton.setObjectName("AddNodesButton")
         self.AddNodesButton.clicked.connect(self.AddNodeClicked)
         self.TheResult_Label = QtWidgets.QLabel(self.centralwidget)
-        self.TheResult_Label.setGeometry(QtCore.QRect(10, 280, 751, 481))
+        # self.TheResult_Label.setGeometry(QtCore.QRect(10, 280, 751, 481))
+        self.TheResult_Label.setGeometry(QtCore.QRect(10, 280, 750, 200))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.TheResult_Label.setFont(font)
@@ -224,13 +241,13 @@ class Ui_AISearchingTechniquesMainWindow(object):
         self.AddNodeHeuristicButton.setFont(font)
         self.AddNodeHeuristicButton.setObjectName("AddNodeHeuristicButton")
         self.AddNodeHeuristicButton.clicked.connect(self.HeuristicPushed)
-        self.StartNode_input = QtWidgets.QLineEdit(self.centralwidget)
-        self.StartNode_input.setGeometry(QtCore.QRect(430, 49, 137, 22))
+        self.startingNode = QtWidgets.QLineEdit(self.centralwidget)
+        self.startingNode.setGeometry(QtCore.QRect(430, 49, 137, 22))
         font = QtGui.QFont()
         font.setPointSize(8)
-        self.StartNode_input.setFont(font)
-        self.StartNode_input.setText("")
-        self.StartNode_input.setObjectName("StartNode_input")
+        self.startingNode.setFont(font)
+        self.startingNode.setText("")
+        self.startingNode.setObjectName("StartNode_input")
         self.StartNodeLabel = QtWidgets.QLabel(self.centralwidget)
         self.StartNodeLabel.setGeometry(QtCore.QRect(430, 26, 61, 16))
         font = QtGui.QFont()
@@ -264,14 +281,14 @@ class Ui_AISearchingTechniquesMainWindow(object):
         self.SubmitButton.setFont(font)
         self.SubmitButton.setObjectName("SubmitButton")
         self.SubmitButton.clicked.connect(self.SubmitClicked)
-        AISearchingTechniquesMainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(AISearchingTechniquesMainWindow)
+        mainWindow.setCentralWidget(self.centralwidget)
+        self.statusbar = QtWidgets.QStatusBar(mainWindow)
         self.statusbar.setObjectName("statusbar")
 
-        self.TheResult_Label.setStyleSheet("background-color: lightGray;")
+        self.TheResult_Label.setStyleSheet("background-color: white")
         
         # Set the label colors
-        self.TheResultLabel.setStyleSheet("color: red;")
+        self.TheResultLabel.setStyleSheet("color: rgb(53, 123, 214); font-weight: 600")
         self.Node1Label.setStyleSheet("color: black;")
         self.Node2Label.setStyleSheet("color: black;")
         self.EdgeWieghtLabel.setStyleSheet("color: black;")
@@ -280,52 +297,40 @@ class Ui_AISearchingTechniquesMainWindow(object):
         self.StartNodeLabel.setStyleSheet("color: black;")
         self.GoalNodeLabel.setStyleSheet("color: black;")
 
-        # Set the line edit colors
-        self.Node1_input.setStyleSheet("background-color: lightYellow;")
-        self.Node2_input.setStyleSheet("background-color: lightYellow;")
-        self.EdgeWieght_input.setStyleSheet("background-color: lightYellow;")
-        self.Node_Input.setStyleSheet("background-color: lightYellow;")
-        self.NodeHeuristic_input.setStyleSheet("background-color: lightYellow;")
-        self.StartNode_input.setStyleSheet("background-color: lightYellow;")
-        self.GoalNode_input.setStyleSheet("background-color: lightYellow;")
-
-        # Set the status bar color
-        self.statusbar.setStyleSheet("background-color: gray;")
-
-        self.retranslateUi(AISearchingTechniquesMainWindow)
-        QtCore.QMetaObject.connectSlotsByName(AISearchingTechniquesMainWindow)
-        AISearchingTechniquesMainWindow.setStatusBar(self.statusbar)
+        self.retranslateUi(mainWindow)
+        QtCore.QMetaObject.connectSlotsByName(mainWindow)
+        mainWindow.setStatusBar(self.statusbar)
 
     def retranslateUi(self, AISearchingTechniquesMainWindow):
         _translate = QtCore.QCoreApplication.translate
         AISearchingTechniquesMainWindow.setWindowTitle(
-            _translate("AISearchingTechniquesMainWindow", "AI Searching Techniques"))
-        self.SearchTypecomboBox.setCurrentText(_translate("AISearchingTechniquesMainWindow", "BFS"))
-        self.SearchTypecomboBox.setItemText(0, _translate("AISearchingTechniquesMainWindow", "BFS"))
-        self.SearchTypecomboBox.setItemText(1, _translate("AISearchingTechniquesMainWindow", "DFS"))
-        self.SearchTypecomboBox.setItemText(2, _translate("AISearchingTechniquesMainWindow", "A*"))
-        self.SearchTypecomboBox.setItemText(3, _translate("AISearchingTechniquesMainWindow", "UCS"))
-        self.SearchTypecomboBox.setItemText(4, _translate("AISearchingTechniquesMainWindow", "IDS"))
-        self.SearchTypecomboBox.setItemText(5, _translate("AISearchingTechniquesMainWindow", "Bidirect"))
-        self.SearchTypecomboBox.setItemText(6, _translate("AISearchingTechniquesMainWindow", "BESTF"))
-        self.GenerateGraphButton.setText(_translate("AISearchingTechniquesMainWindow", "Generate Graph"))
-        self.Node1Label.setText(_translate("AISearchingTechniquesMainWindow", "Node 1"))
-        self.Node2Label.setText(_translate("AISearchingTechniquesMainWindow", "Node 2"))
-        self.EdgeWieghtLabel.setText(_translate("AISearchingTechniquesMainWindow", "Edge Wieght"))
-        self.AddNodesButton.setText(_translate("AISearchingTechniquesMainWindow", "Add Nodes"))
-        self.TheResult_Label.setWhatsThis(_translate("AISearchingTechniquesMainWindow",
+            _translate("AI Project", "AI Project"))
+        self.SearchTypecomboBox.setCurrentText(_translate("AI Project", "BFS"))
+        self.SearchTypecomboBox.setItemText(0, _translate("AI Project", "BFS"))
+        self.SearchTypecomboBox.setItemText(1, _translate("AI Project", "DFS"))
+        self.SearchTypecomboBox.setItemText(2, _translate("AI Project", "A*"))
+        self.SearchTypecomboBox.setItemText(3, _translate("AI Project", "UCS"))
+        self.SearchTypecomboBox.setItemText(4, _translate("AI Project", "IDS"))
+        self.SearchTypecomboBox.setItemText(5, _translate("AI Project", "Bidirect"))
+        self.SearchTypecomboBox.setItemText(6, _translate("AI Project", "BESTF"))
+        self.GenerateGraphButton.setText(_translate("AI Project", "Generate Graph"))
+        self.Node1Label.setText(_translate("AI Project", "Node 1"))
+        self.Node2Label.setText(_translate("AI Project", "Node 2"))
+        self.EdgeWieghtLabel.setText(_translate("AI Project", "Edge Wieght"))
+        self.AddNodesButton.setText(_translate("AI Project", "Add Nodes"))
+        self.TheResult_Label.setWhatsThis(_translate("AI Project",
                                                      "<html><head/><body><p align=\"center\"><br/></p></body></html>"))
-        self.GeneratePathButton.setText(_translate("AISearchingTechniquesMainWindow", "Generate Path"))
-        self.TheResultLabel.setText(_translate("AISearchingTechniquesMainWindow", "The Result"))
-        self.NodeLabel.setText(_translate("AISearchingTechniquesMainWindow", "Node "))
-        self.NodeHeuristicLabel.setText(_translate("AISearchingTechniquesMainWindow", "Node Heuristic"))
-        self.AddNodeHeuristicButton.setText(_translate("AISearchingTechniquesMainWindow", "Add Node Heuristic"))
-        self.StartNodeLabel.setText(_translate("AISearchingTechniquesMainWindow", "Start Node"))
-        self.GoalNodeLabel.setText(_translate("AISearchingTechniquesMainWindow", "Goal Nodes"))
-        self.GraphTypecomboBox.setCurrentText(_translate("AISearchingTechniquesMainWindow", "Undirectd Graph"))
-        self.GraphTypecomboBox.setItemText(0, _translate("AISearchingTechniquesMainWindow", "Undirectd Graph"))
-        self.GraphTypecomboBox.setItemText(1, _translate("AISearchingTechniquesMainWindow", "Directed Graph"))
-        self.SubmitButton.setText(_translate("AISearchingTechniquesMainWindow", "Submit"))
+        self.GeneratePathButton.setText(_translate("AI Project", "Generate Path"))
+        self.TheResultLabel.setText(_translate("AI Project", "The Result"))
+        self.NodeLabel.setText(_translate("AI Project", "Node "))
+        self.NodeHeuristicLabel.setText(_translate("AI Project", "Node Heuristic"))
+        self.AddNodeHeuristicButton.setText(_translate("AI Project", "Add Node Heuristic"))
+        self.StartNodeLabel.setText(_translate("AI Project", "Start Node"))
+        self.GoalNodeLabel.setText(_translate("AI Project", "Goal Nodes"))
+        self.GraphTypecomboBox.setCurrentText(_translate("AI Project", "Undirectd Graph"))
+        self.GraphTypecomboBox.setItemText(0, _translate("AI Project", "Undirectd Graph"))
+        self.GraphTypecomboBox.setItemText(1, _translate("AI Project", "Directed Graph"))
+        self.SubmitButton.setText(_translate("AI Project", "Submit"))
 
 
 if __name__ == "__main__":
