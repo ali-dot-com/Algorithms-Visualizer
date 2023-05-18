@@ -4,7 +4,7 @@ def lowestIndex(costs):
     min = 0
 
     for i in range(len(costs)):
-        if costs[i] > min:
+        if costs[i] > costs[min]:
             min = i
 
     return min
