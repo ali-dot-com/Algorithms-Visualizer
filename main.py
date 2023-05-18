@@ -7,6 +7,7 @@ import sys
 from ucs import UCS
 from bfs import BFS
 from dfs import DFS
+from Astar import AStar
 
 DG = nx.DiGraph()
 G = nx.Graph()
@@ -54,6 +55,12 @@ class Ui_AISearchingTechniquesMainWindow(object):
                     graphucs = UCS(G)
                     path = graphucs.ucs(Goal_list, StartNode)
 
+                    nx.draw_networkx(path)
+                    plt.show()
+
+                elif searchType == "A*":
+                    graphAstar = AStar(G)
+                    path = graphAstar.aStar(Goal_list, StartNode, self.H)
                     nx.draw_networkx(path)
                     plt.show()
 
@@ -117,14 +124,15 @@ class Ui_AISearchingTechniquesMainWindow(object):
     def HeuristicPushed(self):
         InputHeuristic = int(self.NodeHeuristic_input.text())
         InputNodeH = self.Node_Input.text()
-        self.H[self.Node_Input.text()] = self.NodeHeuristic_input.text()
-        self.HeuristicDict.update({InputNodeH: InputHeuristic})
-        self.graphfirst.set_heuristics(self.HeuristicDict)
-        self.graphfirst2.set_heuristics(self.HeuristicDict)
-        self.graphastar1.set_heuristics(self.HeuristicDict)
-        self.graphastar2.set_heuristics(self.HeuristicDict)
+        self.H[self.Node_Input.text()] = int(self.NodeHeuristic_input.text())
+        # self.HeuristicDict.update({InputNodeH: InputHeuristic})
+        # self.graphfirst.set_heuristics(self.HeuristicDict)
+        # self.graphfirst2.set_heuristics(self.HeuristicDict)
+        # self.graphastar1.set_heuristics(self.HeuristicDict)
+        # self.graphastar2.set_heuristics(self.HeuristicDict)
         self.Node_Input.clear()
         self.NodeHeuristic_input.clear()
+
 
     def SubmitClicked(self):
         G = self.GoalNode_input.text()
