@@ -4,6 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 # from matplotlib.widgets import *
 # from PyQt5.QtWidgets import QMessageBox
 import sys
+from ucs import UCS
 from bfs import BFS
 from dfs import DFS
 
@@ -23,7 +24,7 @@ class Ui_AISearchingTechniquesMainWindow(object):
         original_stdout = sys.stdout  # Save a reference to the original standard output
 
         with open('test.txt', 'w') as f:
-            sys.stdout = f  # Change the standard output to the file we created.
+            #sys.stdout = f  # Change the standard output to the file we created.
             searchType = str(self.SearchTypecomboBox.currentText())
             graphType = str(self.GraphTypecomboBox.currentText())
             start = self.startingNode.text()
@@ -48,6 +49,14 @@ class Ui_AISearchingTechniquesMainWindow(object):
                         Goal_list.clear()
                     else:
                         print("Path Does not exist")
+
+                elif searchType == "UCS":
+                    graphucs = UCS(G)
+                    path = graphucs.ucs(Goal_list, StartNode)
+
+                    nx.draw_networkx(path)
+                    plt.show()
+
 
             else:       #for directed graph
                 if searchType == "BFS":
@@ -95,7 +104,7 @@ class Ui_AISearchingTechniquesMainWindow(object):
     def AddNodeClicked(self):
         N1 = self.Node1_input.text()
         N2 = self.Node2_input.text()
-        W = self.EdgeWieght_input.text()
+        W = int(self.EdgeWieght_input.text())
         G.add_edge(N1, N2, weight=W)
         DG.add_edge(N1, N2, weight=W)
 
@@ -120,7 +129,10 @@ class Ui_AISearchingTechniquesMainWindow(object):
     def SubmitClicked(self):
         G = self.GoalNode_input.text()
         Goal_list.append(G)
+        global StartNode
+        StartNode = self.startingNode.text()
         self.GoalNode_input.clear()
+        self.startingNode.clear()
 
     def setupUi(self, mainWindow):
         mainWindow.setObjectName("AI Project")
