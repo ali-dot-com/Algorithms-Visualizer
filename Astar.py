@@ -22,7 +22,6 @@ class AStar:
         self.G = G
 
     def aStar(self, goal_list, start, heuristics):
-        print("Here")
         Graph = self.G
 
         # initializing parents

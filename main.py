@@ -61,6 +61,7 @@ class Ui_AISearchingTechniquesMainWindow(object):
                 elif searchType == "A*":
                     graphAstar = AStar(G)
                     path = graphAstar.aStar(Goal_list, StartNode, self.H)
+
                     nx.draw_networkx(path)
                     plt.show()
 
