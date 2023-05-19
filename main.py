@@ -8,6 +8,7 @@ from ucs import UCS
 from bfs import BFS
 from dfs import DFS
 from Astar import AStar
+from AlphaBeta import AlphaBeta
 
 DG = nx.DiGraph()
 G = nx.Graph()
@@ -25,7 +26,7 @@ class Ui_AISearchingTechniquesMainWindow(object):
         original_stdout = sys.stdout  # Save a reference to the original standard output
 
         with open('test.txt', 'w') as f:
-            #sys.stdout = f  # Change the standard output to the file we created.
+            sys.stdout = f  # Change the standard output to the file we created.
             searchType = str(self.SearchTypecomboBox.currentText())
             graphType = str(self.GraphTypecomboBox.currentText())
             start = self.startingNode.text()
@@ -61,10 +62,15 @@ class Ui_AISearchingTechniquesMainWindow(object):
                 elif searchType == "A*":
                     graphAstar = AStar(G)
                     path = graphAstar.aStar(Goal_list, StartNode, self.H)
-
                     nx.draw_networkx(path)
                     plt.show()
 
+                elif searchType == "Alpha-Beta":
+                    graphAlphaBeta = AlphaBeta(G, self.H)
+                    graph = graphAlphaBeta.alphaBeta(StartNode, self.H)
+                    labels = nx.get_node_attributes(graph, 'val')
+                    nx.draw_networkx(graph, labels = labels)
+                    plt.show()
 
             else:       #for directed graph
                 if searchType == "BFS":
@@ -112,7 +118,8 @@ class Ui_AISearchingTechniquesMainWindow(object):
     def AddNodeClicked(self):
         N1 = self.Node1_input.text()
         N2 = self.Node2_input.text()
-        W = int(self.EdgeWieght_input.text())
+        weight = self.EdgeWieght_input.text()
+        W = int(weight) if weight != "" else 1
         G.add_edge(N1, N2, weight=W)
         DG.add_edge(N1, N2, weight=W)
 
@@ -154,6 +161,7 @@ class Ui_AISearchingTechniquesMainWindow(object):
         font.setPointSize(8)
         self.SearchTypecomboBox.setFont(font)
         self.SearchTypecomboBox.setObjectName("SearchTypecomboBox")
+        self.SearchTypecomboBox.addItem("")
         self.SearchTypecomboBox.addItem("")
         self.SearchTypecomboBox.addItem("")
         self.SearchTypecomboBox.addItem("")
@@ -334,6 +342,7 @@ class Ui_AISearchingTechniquesMainWindow(object):
         self.SearchTypecomboBox.setItemText(4, _translate("AI Project", "IDS"))
         self.SearchTypecomboBox.setItemText(5, _translate("AI Project", "Bidirect"))
         self.SearchTypecomboBox.setItemText(6, _translate("AI Project", "BESTF"))
+        self.SearchTypecomboBox.setItemText(7, _translate("AI Project", "Alpha-Beta"))
         self.GenerateGraphButton.setText(_translate("AI Project", "Generate Graph"))
         self.Node1Label.setText(_translate("AI Project", "Node 1"))
         self.Node2Label.setText(_translate("AI Project", "Node 2"))

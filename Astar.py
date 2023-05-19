@@ -36,16 +36,13 @@ class AStar:
         costs.append(0)
 
         while len(Q) > 0:
-
             lowest = lowestIndex(Q, costs, heuristics)
-
             curr = Q.pop(lowest)
             curr_cost = costs.pop(lowest)
             visited.append(curr)
 
             # Goal Test
             if curr in goal_list:
-
                 # - Goal is found
                 path = nx.DiGraph()
                 while curr != start:
